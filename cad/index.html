@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#e4e5e1"><title>Datapath — Circuit workspace</title><meta name="description" content="พื้นที่ทดลอง Multicycle Datapath ข้อ 3: ไล่ทุก cycle และแก้ไขวงจรแบบ CAD ลากอุปกรณ์ ต่อสาย และจำลองผลจริง"><link rel="icon" href="../assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="workspace.css"><link rel="stylesheet" href="cases.css"></head>
+<body>
+ <header class="app-header">
+  <a class="brand" href="./" aria-label="Datapath workspace">
+  <img src="../assets/logo-d.png" alt="Datapath Logo" class="brand-icon">
+  
+  <strong>AutoPath</strong>
+</a>
+  <div class="mode-switch" role="group" aria-label="โหมดการทำงาน"><button data-mode="learn" class="active">Learn <span>เรียน</span></button><button data-mode="edit">Edit <span>แก้ไข</span></button></div>
+  <button id="file-menu" class="button">ไฟล์ <span class="chevron">v</span></button>
+ </header>
+ <div class="program-bar">
+  <span class="bar-label">INSTRUCTION</span>
+
+  <span
+    class="current-instruction"
+    id="current-instruction">
+  </span>
+
+  <div class="bar-divider"></div>
+  <div class="preset-tabs" id="presets"></div>
+
+  <button
+    id="open-code"
+    class="code-button"
+    aria-controls="code-pane"
+    aria-expanded="false">
+    <span class="code-symbol">&lt;/&gt;</span>
+    <span>เขียนคำสั่ง</span>
+  </button>
+
+  <button id="open-cases" class="cases-launch">
+    <span>▦</span> ตัวอย่างวงจร
+  </button>
+</div>
+ <section class="timeline" aria-label="เลือก state และ cycle"><div class="transport"><button id="rewind" class="icon-button" title="เริ่มโปรแกรมใหม่" aria-label="เริ่มโปรแกรมใหม่">↺</button><button id="prev" class="icon-button" aria-label="cycle ก่อนหน้า">‹</button><button id="play" class="play-button" aria-label="เล่นการจำลอง">▶</button><button id="next" class="icon-button" aria-label="cycle ถัดไป">›</button><div class="cycle-meta"><small>CLOCK CYCLE</small><strong id="cycle-count">01 <span>/ 03</span></strong></div></div><div id="states" class="state-tabs"></div><button id="trace" class="trace-button">ดูทั้งโปรแกรม <span>↗</span></button></section>
+ <div id="case-bar" class="case-bar" hidden></div>
+ <main class="workspace">
+  <section id="board-panel" class="board-shell" aria-label="พื้นที่วงจร">
+   <div class="board-head"><div><span class="live-dot"></span><span id="design-title">Multicycle machine</span><span id="design-badge" class="mini-badge">BASE CIRCUIT</span></div><div class="board-options"><label><input type="checkbox" id="show-control" checked><span class="control-dot"></span>Control</label><label><input type="checkbox" id="show-values" checked>ค่าบนวงจร</label></div></div>
+   <div id="drawing-tools" class="drawing-tools" role="toolbar" aria-label="เครื่องมือวงจร">
+    <button data-tool="select" class="active" title="เลือก / ย้าย (V)" aria-label="เลือกและย้ายอุปกรณ์"><svg viewBox="0 0 24 24"><path d="M5 3l14 10-7 1-3 7z"/></svg></button>
+    <button data-tool="wire" title="ต่อสาย (W)" aria-label="ต่อสาย"><svg viewBox="0 0 24 24"><path d="M5 5h8v14h6"/><circle cx="5" cy="5" r="2"/><circle cx="19" cy="19" r="2"/></svg></button>
+    <button data-tool="pan" title="เลื่อนพื้นที่ (H / Space)" aria-label="เลื่อนพื้นที่"><svg viewBox="0 0 24 24"><path d="M8 11V5a2 2 0 0 1 4 0v6-7a2 2 0 0 1 4 0v7-5a2 2 0 0 1 4 0v10c0 4-3 6-7 6-3 0-5-3-8-7a2 2 0 0 1 3-3l2 2"/></svg></button>
+    <div class="tool-separator"></div><button id="add-node" title="เพิ่มอุปกรณ์" aria-label="เพิ่มอุปกรณ์"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+    <div class="tool-separator"></div><button id="undo" title="Undo (Ctrl Z)" aria-label="Undo"><svg viewBox="0 0 24 24"><path d="M8 5L3 10l5 5M3 10h10a6 6 0 0 1 6 6v3"/></svg></button><button id="redo" title="Redo (Ctrl Shift Z)" aria-label="Redo"><svg viewBox="0 0 24 24"><path d="M16 5l5 5-5 5m5-5h-10a6 6 0 0 0-6 6v3"/></svg></button>
+   </div>
+   <div id="canvas-wrap"><svg id="scene" role="img" aria-label="วงจร Multicycle ข้อ 3 เลือกอุปกรณ์หรือสายเพื่อดูรายละเอียด" tabindex="0"><defs><pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="0.8" fill="#d8dad0"/></pattern><marker id="arrow-data" markerWidth="5" markerHeight="5" refX="4.4" refY="2.5" orient="auto"><path d="M0 0L5 2.5L0 5Z" fill="context-stroke"/></marker></defs><rect x="-20000" y="-20000" width="40000" height="40000" fill="url(#grid)" id="board-grid"/><g id="drawing"></g><g id="overlay"></g></svg></div>
+   <div class="canvas-bottom"><div id="canvas-hint">คลิกสายหรืออุปกรณ์เพื่อดูค่าของรอบนี้</div><div class="zoom-tools"><button id="zoom-out" aria-label="ซูมออก">−</button><span id="zoom-level">100%</span><button id="zoom-in" aria-label="ซูมเข้า">+</button><button id="fit" title="จัดวงจรให้พอดีจอ (F)" aria-label="พอดีจอ"><svg viewBox="0 0 24 24"><path d="M8 4H4v4m12-4h4v4M4 16v4h4m12-4v4h-4"/></svg></button></div></div>
+   <div id="library-sheet" class="library-sheet" role="dialog" aria-label="เพิ่มอุปกรณ์" inert><div class="sheet-grab"></div><div class="sheet-head"><div><h3>เพิ่มอุปกรณ์</h3><p>วางอุปกรณ์แล้วต่อขาให้ครบก่อนกลับไปทดลอง</p></div><button data-sheet-close aria-label="ปิด">×</button></div><div class="library" id="library-items"></div><p class="sheet-note">PC, IR, Register File, Memory และ Main control ต้องมีอย่างละ 1 ตัวในแบบจำลองนี้ ใช้การเพิ่มเพื่อแทนตัวเดิมได้</p></div>
+   <div id="toast" role="status" aria-live="polite"></div>
+  </section>
+  <div id="panel-resizer" class="panel-resizer" role="separator" tabindex="0" aria-label="ปรับความกว้างพื้นที่วงจรและคำอธิบาย" aria-orientation="vertical" aria-controls="board-panel side-panel"></div>
+  <div class="side-column" id="side-panel">
+   <section class="code-pane" id="code-pane" aria-label="เขียนคำสั่ง" hidden>
+    <div class="pane-head"><span class="pane-title"><b>&lt;/&gt;</b>INSTRUCTION</span><span id="code-state" class="code-state">ตรงกับวงจรที่รันอยู่</span></div>
+    <div class="code-field main"><label for="program">MIPS ASSEMBLY</label><textarea id="program" spellcheck="false"></textarea></div>
+    <div class="code-field init"><label for="initial-values">REGISTER / MEMORY เริ่มต้น</label><textarea id="initial-values" spellcheck="false"></textarea></div>
+    <div id="code-error" class="dialog-error"></div>
+    <div class="code-actions"><button id="run-code" class="run">รันโปรแกรม <span>Ctrl ↵</span></button></div>
+    <p class="code-help">รองรับ add · sub · and · or · nor · slt · lw · sw · beq · j · ใช้ label ได้ เช่น <code>loop: add $s0, $t0, $t1</code> · comment เริ่มด้วย # · address ต้องหาร 4 ลงตัว</p>
+   </section>
+   <aside class="inspector" id="inspector" aria-label="รายละเอียดวงจร"></aside>
+  </div>
+ </main>
+ <footer class="statusbar"><div><span id="health"></span><span id="mode-status">Learn mode</span></div><div><label><input id="snap" type="checkbox" checked> Snap 10 px</label><span id="counts"></span><span>32-bit · 3-state</span></div></footer>
+ <input id="import-input" type="file" accept=".json,application/json" hidden>
+ <script src="../engine.js"></script><script src="model.js"></script><script src="simulator.js"></script><script src="cases.js"></script><script src="workspace.js"></script><script src="casebook.js"></script>
+</body></html>

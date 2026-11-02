@@ -3,6 +3,22 @@
 // are separate so exploring examples never silently consumes their workspace.
 window.Casebook=(()=>{
  const KEY='datapath-cad-casebook-v1';
+ const galleryTitles={
+  "same-circuit": "จัดวางวงจรใหม่ โดยผลลัพธ์ไม่เปลี่ยน",
+  "operand-selector": "เพิ่มทางเลือกข้อมูลเข้า ALU ด้วย MUX",
+  "swapped-operands": "ต่ออินพุต ALU สลับด้าน",
+  "bypass-aluout": "เขียนผลผิดรอบ เพราะข้าม ALUOut",
+  "pc-plus-eight": "PC เพิ่มผิด ทำให้ข้ามคำสั่ง",
+  "unconditional-branch": "Branch กระโดดทั้งที่เงื่อนไขไม่ผ่าน",
+  "load-wrong-register": "โหลดข้อมูลเข้า Register ผิดตัว",
+  "memory-disabled": "อ่าน Memory ไม่ได้ เพราะปิด MemRead",
+  "index-is-not-data": "ต่อบัสผิดชนิดและขนาดบิต",
+  "combinational-feedback": "วงจรป้อนกลับที่คำนวณต่อไม่ได้",
+  "missing-offset-shift": "Branch ไปผิด Address เพราะหน่วยไม่ตรง",
+  "false-forwarding": "Bypass เลือกข้อมูลผิด cycle",
+  "shared-memory-prefetch": "Fetch กับ Load แย่งพอร์ต Memory"
+};
+ const galleryKinds={good:'ผลลัพธ์เดิม',tradeoff:'มีข้อแลกเปลี่ยน',broken:'วิเคราะห์ข้อผิดพลาด',hazard:'ศึกษา Hazard'};
  const kinds={all:'ทั้งหมด',good:'ทำงานถูก',tradeoff:'มีข้อแลกเปลี่ยน',broken:'เกิดปัญหา',hazard:'เข้าใจ Hazard'};
  let session=null,archivedDrafts={},filter='all',cachedKey='',cachedBase=null,originalHistory=null;
  const clone=Circuit.clone;
@@ -39,14 +55,16 @@ window.Casebook=(()=>{
   const wires=g.wires.map(w=>`<path d="${pathOf(Circuit.orthogonal(g,w))}" class="preview-wire ${c.wires.includes(w.id)?'highlight':''}"/>`).join('');
   const nodes=g.nodes.map(n=>{
    const def=Circuit.definitions[n.type];
-   const label=['and','or'].includes(n.type)?'':text(def.w/2,def.h/2+5,n.label,'preview-label');
+   const showLabel=!['and','or','concat'].includes(n.type)&&(c.nodes.includes(n.id)||def.w>=60);
+   const lines=String(n.type==='constant'?n.value:n.label).split(' ');
+   const label=showLabel?lines.map((line,i)=>text(def.w/2,def.h/2+5+(i-(lines.length-1)/2)*16,line,'preview-label')).join(''):'';
    return `<g transform="translate(${n.x},${n.y})" class="preview-node ${c.nodes.includes(n.id)?'highlight':''}">${componentShape(n)}${label}</g>`;
   }).join('');
   return `<svg class="case-preview" viewBox="${cx-280} ${cy-165} 560 330" aria-hidden="true">${wires}${nodes}</svg>`;
  }
  function gallery(){remember();rawSave();const subset=CircuitCases.all.filter(c=>filter==='all'||c.kind===filter);
-  const body=`<div class="case-grid">${subset.map(c=>`<button class="case-card" data-case-open="${c.id}"><h3>${E(c.title)}</h3>${casePreview(c)}</button>`).join('')}</div>`;
-  const el=dialog('ตัวอย่างวงจร','',body,true);el.classList.add('case-gallery');el.setAttribute('aria-label','คลังตัวอย่างวงจร 13 เคส');
+  const body=`<div class="gallery-overview"><span>เลือกปัญหาที่อยากเข้าใจ แล้วดูจุดที่เปลี่ยนในวงจร</span><span class="gallery-count">${subset.length} วงจรทดลอง</span></div><div class="case-grid">${subset.map(c=>`<button type="button" class="case-card" data-case-open="${c.id}" aria-labelledby="gallery-title-${c.id}" aria-describedby="gallery-desc-${c.id}"><span class="gallery-card-meta"><span class="gallery-case-id">CASE ${String(c.number).padStart(2,'0')}</span><span class="gallery-kind ${c.kind}">${E(galleryKinds[c.kind]||kinds[c.kind])}</span></span><span class="gallery-card-copy"><span class="gallery-card-title" id="gallery-title-${c.id}">${E(galleryTitles[c.id]||c.title)}</span><span class="gallery-card-description" id="gallery-desc-${c.id}">${E(c.title)}</span></span><span class="gallery-card-image">${casePreview(c)}</span><span class="gallery-card-footer"><span>เปิดวงจรและดูการทำงาน</span><span class="gallery-card-arrow" aria-hidden="true">↗</span></span></button>`).join('')}</div>`;
+  const el=dialog('ตัวอย่างวงจร','สำรวจปัญหา ทดลองแก้ และเทียบผลกับวงจรต้นแบบ',body,true);el.classList.add('case-gallery','case-gallery-v2');el.setAttribute('aria-label','คลังตัวอย่างวงจร 13 เคส');
  }
  function showValue(result,index,probe){const value=CircuitCases.read(result,index,probe.path);return value===undefined?'<span class="case-no-value">หยุดก่อนรอบนี้</span>':probe.hex?CPU.hex(value):String(value|0)}
  function lesson(c){const b=baseResult(),r=editedResult(),focus=Math.min(cursor,Math.max(b.frames.length,r.frames.length)-1),sf=simulation.frames[cursor];

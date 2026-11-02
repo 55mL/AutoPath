@@ -21,3 +21,47 @@
 .preview-node.highlight .node-body{fill:#e8f5a4;stroke:#607415;stroke-width:2.5}
 .preview-label{font:600 14px var(--mono);fill:#303624;paint-order:stroke;stroke:#fff;stroke-width:2px}
 @media(max-width:760px){.case-gallery .case-grid{grid-template-columns:1fr}.case-gallery .dialog-body{padding:16px}.case-gallery .case-card h3{min-height:0}}
+
+/* Problem-led circuit gallery. Scoped to this dialog only. */
+.case-gallery-v2{background:#f5f6f1;border:1px solid #dfe3d5;border-radius:28px;scrollbar-width:thin;scrollbar-color:#a8b198 #f5f6f1}
+.case-gallery-v2 .dialog-head{position:sticky;top:0;z-index:2;background:#fff;padding:24px 28px;border-bottom:1px solid #e2e6da;gap:16px}
+.case-gallery-v2 .dialog-head h2{font-size:24px;font-weight:600;color:#1e2719}
+.case-gallery-v2 .dialog-head p{font-size:13px;color:#59634f;margin-top:4px}
+.case-gallery-v2 .dialog-head>button{display:grid;place-items:center;flex:0 0 36px;height:36px;border-radius:50%;background:#eef1e7;color:#35432a;padding:0}
+.case-gallery-v2 .dialog-head>button:hover{background:#d8f066}
+.case-gallery-v2 .dialog-body{padding:20px 28px 28px}
+.gallery-overview{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;color:#59634f;font-size:12px}
+.gallery-count{flex-shrink:0;border:1px solid #d6ddc9;border-radius:999px;padding:5px 10px;background:#fff;font-weight:500;color:#35432a}
+.case-gallery-v2 .case-grid{gap:18px;align-items:stretch}
+.case-gallery-v2 .case-card{display:flex;flex-direction:column;gap:0;padding:20px;background:#fff;border:1px solid #dde3d4;border-radius:20px;box-shadow:0 3px 9px #26341405;transition:transform .18s,border-color .18s,box-shadow .18s;text-align:left}
+.case-gallery-v2 .case-card:hover{background:#fff;border-color:#8cae41;box-shadow:0 10px 26px #26341414;transform:translateY(-3px)}
+.case-gallery-v2 .case-card:focus-visible{outline:3px solid #506f21!important;outline-offset:3px}
+.gallery-card-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:13px}
+.gallery-case-id{font:500 10px var(--mono);letter-spacing:1px;color:#5f6d51}
+.gallery-kind{font-size:10px;font-weight:500;padding:3px 9px;border-radius:999px;line-height:1.6;color:#5f4934;background:#f5eee5}
+.gallery-kind.good{background:#edf5d8;color:#45621a}
+.gallery-kind.tradeoff{background:#eaf0e6;color:#3f5e43}
+.gallery-kind.hazard{background:#eeebf5;color:#635079}
+.gallery-card-copy{display:block;margin-bottom:18px;min-height:86px}
+.gallery-card-title{display:block;color:#1c2716;font-size:19px;font-weight:600;line-height:1.55;letter-spacing:-.25px;overflow-wrap:anywhere}
+.gallery-card-description{display:block;color:#5b6651;font-size:13px;font-weight:400;line-height:1.7;margin-top:6px}
+.gallery-card-image{display:block;margin-top:auto;border:1px solid #e0e6d4;background:#f5f8ec;border-radius:12px;overflow:hidden;isolation:isolate}
+.case-gallery-v2 .case-preview{display:block;width:100%;height:auto;aspect-ratio:560/300;border:0;border-radius:0;background:radial-gradient(circle,#d5ddc5 .7px,transparent .8px) 0 0/12px 12px,#f5f8ec}
+.case-gallery-v2 .preview-wire{stroke:#bdc8aa;stroke-width:2}
+.case-gallery-v2 .preview-wire.highlight{stroke:#548326;stroke-width:4}
+.case-gallery-v2 .preview-node.highlight .node-body{fill:#e1f29f;stroke:#638827;stroke-width:2.5}
+.case-gallery-v2 .preview-label{font:500 13px var(--mono);fill:#344329;stroke:#f8fbed;stroke-width:2}
+.gallery-card-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:14px;color:#425233;font-size:12px;font-weight:500}
+.gallery-card-arrow{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#eef3e5;color:#344e1b;font-size:19px;transition:background .18s}
+.case-card:hover .gallery-card-arrow{background:#d8f066}
+@media(max-width:760px){
+ .case-gallery-v2 .dialog-head{padding:18px}
+ .case-gallery-v2 .dialog-head h2{font-size:21px}
+ .case-gallery-v2 .dialog-body{padding:16px}
+ .gallery-overview{align-items:flex-start;flex-wrap:wrap}
+ .case-gallery-v2 .case-card{padding:16px}
+ .gallery-card-title{font-size:18px}
+ .gallery-card-copy{min-height:0}
+ .gallery-card-meta{flex-wrap:wrap}
+}
+@media(prefers-reduced-motion:reduce){.case-gallery-v2 .case-card,.gallery-card-arrow{transition:none}.case-gallery-v2 .case-card:hover{transform:none}}

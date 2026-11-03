@@ -1,6 +1,6 @@
 'use strict';
 
-/** นิยามโครงสร้างและพารามิเตอร์พื้นฐานของวงจร MIPS Datapath  */
+/** พารามิเตอร์พื้นฐานของวงจร MIPS Datapath  */
 const Circuit = (() => {
   /** ทำการคัดลอกข้อมูล Object แบบ Deep Clone */
   const clone = o => JSON.parse(JSON.stringify(o));

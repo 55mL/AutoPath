@@ -30,5 +30,3 @@ const CircuitCases=(()=>{
  return {all:cases,build,read,get:id=>cases.find(c=>c.id===id)};
 })();
 if(typeof module!=='undefined')module.exports=CircuitCases;
-
-เอาแบบเดิมแต่ ไม่เอาพวกคอมเมนต์สองบรรทัด

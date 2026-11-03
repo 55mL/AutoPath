@@ -1,28 +1,20 @@
 'use strict';
 
-/**
- * NetSim: ตัวจำลองการทำงานของซีพียู MIPS แบบจำลองสายไฟ (Clocked, Editable-netlist Simulation)
- * - จำลองการส่งสัญญาณจริงตามเส้นสายไฟ (Wires) และโหนดการทำงาน (Nodes/Modules)
- * - อัปเดต State ต่างๆ (PC, IR, Registers, Latches) พร้อมกันที่ขอบสัญญาณนาฬิกา (Clock Edge)
- */
+/** NetSim จำลองการทำงานของซีพียู MIPS แบบจำลองสายไฟ   */
 const NetSim = (() => {
   // ดึงโมดูลการทำงานภายนอก (Circuit สำหรับตรวจสอบโครงสร้างวงจร, CPU สำหรับข้อมูลโครงสร้าง ISA ภาษา MIPS)
   const C = typeof Circuit !== 'undefined' ? Circuit : require('./model.js');
   const ISA = typeof CPU !== 'undefined' ? CPU : require('../engine.js');
 
-  /**
-   * ฟังก์ชันตัด bit ข้อมูล (Masking) ให้มีความกว้าง b บิตตามที่ต้องการ
-   * ช่วยป้องกัน Overflow และแปลงค่าให้เป็น 32-bit Unsigned Integer ด้วย bitwise `>>> 0`
-   */
+  /** ฟังก์ชันตัด bit ข้อมูล (Masking) ให้มีความกว้าง b บิตตามที่ต้องการ */
   const mask = (v, b) => b === 32 ? v >>> 0 : (v >>> 0) & (2**b - 1);
 
   // ตารางแมปชื่อคำสั่ง MIPS กับรหัส Opcode และ Funct
   const functs = { add: 32, sub: 34, and: 36, or: 37, nor: 39, slt: 42 };
   const opcodes = { j: 2, beq: 4, lw: 35, sw: 43 };
 
-  /**
-   * แปลงโครงสร้างคำสั่ง Assembly (Object) ให้เป็น Machine Code ขนาด 32 บิต (Integer)
-   * @param {Object} x - ออบเจกต์คำสั่ง เช่น { op: 'add', rs: 1, rt: 2, dest: 3 }
+  /** แปลงโครงสร้างคำสั่ง Assembly (Object) ให้เป็น Machine Code ขนาด 32 บิต (Integer)
+   * @param {Object} x - ออบเจกต์คำสั่ง
    * @returns {number} รหัสคำสั่งภาษาเครื่อง 32 บิต
    */
   function encode(x) {
@@ -35,10 +27,9 @@ const NetSim = (() => {
     throw Error('ข้อ 3 รองรับ add, sub, and, or, nor, slt, lw, sw, beq และ j');
   }
 
-  /**
-   * ถอดรหัส Machine Code 32 บิต กลับเป็นข้อมูลเชิงโครงสร้างและข้อความ Assembly
+  /** ถอดรหัส Machine Code 32 บิต กลับเป็นข้อมูลเชิงโครงสร้างและข้อความ Assembly
    * @param {number} word - คำสั่งภาษาเครื่อง 32 บิต
-   * @param {number} pc - ค่า Program Counter ปัจจุบัน (ใช้คำนวณตำแหน่ง Jump target)
+   * @param {number} pc - ค่า Program Counter ปัจจุบัน
    * @returns {Object} ข้อมูลรายละเอียดคำสั่ง (op, rs, rt, rd, imm, funct, text)
    */
   function decode(word, pc = 0) {
@@ -53,7 +44,6 @@ const NetSim = (() => {
       ? Object.keys(functs).find(k => functs[k] === funct) 
       : Object.keys(opcodes).find(k => opcodes[k] === opcode);
 
-    // หากไม่พบ Opcode ที่รองรับ ให้คืนค่าเป็น unknown
     if (!op) return { op: 'unknown', opcode, text: '0x' + (word >>> 0).toString(16).padStart(8, '0'), rs, rt, rd, imm, funct };
 
     const R = i => '$' + ISA.names[i]; // แปลงดัชนี Register เป็นชื่อเช่น $t0, $s0
@@ -65,12 +55,9 @@ const NetSim = (() => {
     return { op, opcode, rs, rt, rd, imm, funct, text };
   }
 
-  // Helper สร้าง Unique Key สำหรับดึงค่าสัญญาณควบคุมจากตาราง Override
   const rowKey = (s, opcode) => s === 0 ? '0:all' : `${s}:${opcode}`;
 
-  /**
-   * คำนวณหาสัญญาณควบคุม (Control Signals) จาก State ของ FSM และ Opcode คำสั่ง
-   */
+  /** หาสัญญาณควบคุม (Control Signals) จาก State ของ FSM และ Opcode คำสั่ง   */
   function control(state, opcode, overrides = {}) {
     const op = opcode === 0 ? 'add' : Object.keys(opcodes).find(k => opcodes[k] === opcode);
     if (state !== 0 && !op) throw Error('Main control ไม่รองรับ opcode ' + opcode.toString(2).padStart(6, '0'));
@@ -79,8 +66,7 @@ const NetSim = (() => {
     return Object.assign(c, overrides[rowKey(state, opcode)] || {});
   }
 
-  /**
-   * จำลองวงจร ALU (Arithmetic Logic Unit) ขนาด 32 บิต
+  /** จำลองวงจร ALU (Arithmetic Logic Unit) ขนาด 32 บิต
    * @param {number} a - ค่า Input A
    * @param {number} b - ค่า Input B
    * @param {number} ctrl - สัญญาณควบคุมการทำงานของ ALU (ALU Control bits)
@@ -107,55 +93,52 @@ const NetSim = (() => {
     return result >>> 0;
   }
 
-  /**
-   * ฟังก์ชันหลักในการจำลองการทำงานของซีพียูตามวงจรที่กำหนด (Simulation Loop)
+  /** ฟังก์ชันหลักในการจำลองการทำงาน
    * @param {Object} graph - โครงสร้างเน็ตลิสต์วงจร (Nodes และ Wires)
    * @param {string} code - โค้ดภาษา Assembly MIPS
    * @param {string} initText - ข้อมูลค่าเริ่มต้นของ Memory/Registers
    * @param {number} limit - จำนวน รอบสัญญาณนาฬิกา (Cycles) สูงสุด
    */
   function simulate(graph, code, initText = '', limit = 180) {
-    // 1. ตรวจสอบความถูกต้องของวงจร Graph
+    // 1. ตรวจความถูกต้องของวงจร 
     const issues = C.validate(graph);
     if (issues.length) return { frames: [], issues, halt: 'invalid' };
 
-    // 2. โหลดโปรแกรมและค่าเริ่มต้น
+    // 2. โหลดโปรแกรม ค่าเริ่มต้น
     let program, initial;
     try {
       program = ISA.parse(code);
       initial = ISA.initial(initText);
-      program.forEach(encode); // ตรวจสอบว่าคำสั่งทั้งหมดสามารถ Encode ได้
+      program.forEach(encode); // ตรวจว่าคำสั่ง Encode ได้
     } catch (e) {
       return { frames: [], issues: [{ message: e.message }], halt: 'invalid' };
     }
 
-    // สร้าง Map ช่วยค้นหาโหนดและสายไฟอย่างรวดเร็ว
+    // สร้าง Map ค้นหาโหนดและสายไฟ
     const byId = new Map(graph.nodes.map(n => [n.id, n])),
           inputs = new Map(graph.wires.map(w => [w.to.node + '.' + w.to.port, w]));
 
     const one = type => graph.nodes.find(n => n.type === type);
     const pcNode = one('pc'), irNode = one('ir'), rfNode = one('registers'), memNode = one('memory'), ctrlNode = one('control');
 
-    // กำหนด State และ Register เริ่มต้นในวงจร
+    // กำหนด State และ Register เริ่มต้น
     let state = 0, pc = 0, ir = 0, irAddress = 0, r = initial.r.map(v => v >>> 0), m = { ...initial.m }, latches = {};
     graph.nodes.filter(n => n.type === 'latch').forEach(n => latches[n.id] = n.initial >>> 0 || 0);
 
-    // ใส่คำสั่ง MIPS ลงใน Memory เริ่มตั้งแต่อพดเดรส 0 (Word aligned)
+    // ใส่คำสั่ง MIPS ลงใน Memory 
     program.forEach((x, i) => m[i * 4] = encode(x));
     let frames = [];
     let halt = 'complete';
 
-    // ----------------------------------------------------------------------
     // 3. วนลูปประมวลผลจำลองการทำงานทีละ Clock Cycle
-    // ----------------------------------------------------------------------
     for (let cycle = 1; cycle <= limit; cycle++) {
-      // เช็คว่า PC หาร 4 ลงตัวหรือไม่ (Word Alignment Check)
+      // เช็คว่า PC หาร 4 ลงตัวมั้ย
       if (pc % 4) {
         issues.push({ message: `PC ${ISA.hex(pc)} ไม่ตรงขอบ word (4 bytes)`, node: pcNode.id });
         halt = 'error';
         break;
       }
-      // เช็คว่าทำงานจบโปรแกรมแล้วหรือไม่
+      // เช็คว่าทำงานจบโปรแกรมมั้ย
       if (state === 0 && (pc >= program.length * 4)) {
         halt = 'complete';
         break;
@@ -180,10 +163,7 @@ const NetSim = (() => {
         return v;
       }
 
-      /**
-       * คำนวณและคืนค่า Output สัญญาณจากพอร์ตของโหนดอุปกรณ์ (Combinational Logic Evaluation)
-       * มีระบบตรวจจับ Combinational Loop เพื่อป้องกัน Infinite Recursion
-       */
+      /** คำนวณและคืนค่า Output สัญญาณจากพอร์ตของโหนดอุปกรณ์ ตรวจจับ Combinational Loop   */
       function output(id, p) {
         const key = id + '.' + p;
         if (cache.has(key)) return cache.get(key);
@@ -224,9 +204,9 @@ const NetSim = (() => {
             value = read('i' + sel);
             break;
           }
-          case 'sign': value = (read('d') << 16) >> 16; break;                  // Sign Extension (16 บิตเป็น 32 บิต)
-          case 'shift': value = read('d') << 2; break;                         // Shift Left 2 บิต
-          case 'concat': value = (read('high') << 28) | (read('low') & 0x0fffffff); break; // การรวมบิตสำหรับคำสั่ง Jump
+          case 'sign': value = (read('d') << 16) >> 16; break; // Sign Extension (16 บิตเป็น 32 บิต)
+          case 'shift': value = read('d') << 2; break; // Shift Left 2 บิต
+          case 'concat': value = (read('high') << 28) | (read('low') & 0x0fffffff); break; 
           case 'and': value = read('b') ? read('a') & 1 : 0; break;
           case 'or': value = read('b') ? 1 : read('a') & 1; break;
           case 'aluctrl': {
@@ -257,7 +237,7 @@ const NetSim = (() => {
         return result;
       }
 
-      // Helper อ่านค่าและติดตามเส้นสายไฟที่แอคทีฟ (Active Wires)
+      // อ่านค่าและติดตามเส้นสายไฟที่ Active
       const use = (n, p, mark = true) => {
         const q = input(n, p);
         if (mark) q.deps.forEach(d => active.add(d));
@@ -265,7 +245,7 @@ const NetSim = (() => {
       };
 
       try {
-        // อ่านสัญญาณควบคุมการเขียนค่า (Write Enables)
+        // อ่านสัญญาณควบคุมการเขียนค่า
         const pcWrite = use(pcNode, 'en'),
               irWrite = use(irNode, 'en'),
               regWrite = use(rfNode, 'en'),
@@ -283,9 +263,7 @@ const NetSim = (() => {
 
         let writeReg, writeData, memAddress, memData;
 
-        // ------------------------------------------------------------------
-        // อัปเดตค่าเมื่อมีสัญญาณ Write Enable ในแต่ละส่วนอุปกรณ์
-        // ------------------------------------------------------------------
+        // อัปเดตค่าเมื่อมีสัญญาณ Write Enable 
         if (regWrite) {
           writeReg = use(rfNode, 'dest');
           writeData = use(rfNode, 'data');
@@ -321,14 +299,14 @@ const NetSim = (() => {
 
         const ctrlValues = Object.fromEntries(Object.keys(C.controls).map(k => [k, output(ctrlNode.id, k).value]));
 
-        // อ่านค่าสถานะสายไฟคงค้างไว้สำหรับแสดงผล UI
+        // อ่านค่าสถานะสายไฟค้างไว้สำหรับแสดงผล UI
         for (const w of graph.wires) {
           try { input(byId.get(w.to.node), w.to.port); } catch { stack.clear(); wireValues[w.id] = null; }
         }
 
         // ประมวลผลเปลี่ยนค่า State จริงที่ Clock Edge
         if (regWrite && writeReg) r[writeReg] = writeData >>> 0;
-        r[0] = 0; // ล็อกให้ Register $zero (r[0]) เป็น 0 เสมอ
+        r[0] = 0; 
         if (memWrite) m[memAddress] = memData >>> 0;
         if (irWrite) irAddress = pc;
 
@@ -369,9 +347,9 @@ const NetSim = (() => {
     return { frames, issues, halt, initial, program, r, m, pc };
   }
 
-  // ส่งออกอินเทอร์เฟซฟังก์ชันภายนอกสำหรับใช้งาน
+  // ส่งออก
   return { simulate, encode, decode, control, rowKey, alu };
 })();
 
-// รองรับการ Export โมดูลบน Node.js
+// Export บน Node.js
 if (typeof module !== 'undefined') module.exports = NetSim;

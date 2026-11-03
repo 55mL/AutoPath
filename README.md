@@ -1,5 +1,11 @@
 # AutoPath
 ### เว็บไไซต์และสื่อการสอนการทำงานของ Datapath
+> ถ้าอาจารย์อยากลองดูโค้ดส่วนการเพิ่ม element ต่างๆ ดูได้ในไฟล์ .cad/simulator.js เป็นหลักนะคะ
+
+
+>วิธีรันใน local
+>ใช้ไฟล์ index.html ที่ ./root ได้เลย
+
 
 จัดทำขึ้นสำหรับโปรเจควิชา Computer Architecture
 
@@ -19,10 +25,6 @@ https://auto-path-swart.vercel.app/cad/
 
 ไฟล์วิดีโอสื่อการสอน
 https://drive.google.com/drive/u/0/folders/1ngEmvzkf19Y59t7LkMWJicSb4AA9KFxM
-
-วิธีรันใน local
-ใช้ไฟล์ index.html ที่ ./root ได้เลย
-
 
 ### กลุ่ม R-type
 > **รูปแบบ:** `op $rd, $rs, $rt`

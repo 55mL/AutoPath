@@ -55,13 +55,13 @@
 .gallery-card-arrow{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#eef3e5;color:#344e1b;font-size:19px;transition:background .18s}
 .case-card:hover .gallery-card-arrow{background:#d8f066}
 @media(max-width:760px){
- .case-gallery-v2 .dialog-head{padding:18px}
- .case-gallery-v2 .dialog-head h2{font-size:21px}
- .case-gallery-v2 .dialog-body{padding:16px}
- .gallery-overview{align-items:flex-start;flex-wrap:wrap}
- .case-gallery-v2 .case-card{padding:16px}
- .gallery-card-title{font-size:18px}
- .gallery-card-copy{min-height:0}
- .gallery-card-meta{flex-wrap:wrap}
+ .case-gallery-v2 .dialog-head{padding:18px}
+ .case-gallery-v2 .dialog-head h2{font-size:21px}
+ .case-gallery-v2 .dialog-body{padding:16px}
+ .gallery-overview{align-items:flex-start;flex-wrap:wrap}
+ .case-gallery-v2 .case-card{padding:16px}
+ .gallery-card-title{font-size:18px}
+ .gallery-card-copy{min-height:0}
+ .gallery-card-meta{flex-wrap:wrap}
 }
 @media(prefers-reduced-motion:reduce){.case-gallery-v2 .case-card,.gallery-card-arrow{transition:none}.case-gallery-v2 .case-card:hover{transform:none}}
